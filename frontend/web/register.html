@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registrar — IALO</title>
+  <link rel="stylesheet" href="public/style.css"/>
+</head>
+<body>
+<header>
+  <strong>IALO</strong>
+  <a href="index.html">Início</a>
+  <a href="participants.html">Participantes</a>
+  <a href="attendance.html">Frequência</a>
+  <a href="events.html">Eventos</a>
+  <a href="reports.html">Relatórios</a>
+  <a href="login.html">Login</a>
+  <a href="register.html" class="active">Registrar</a>
+  <button id="logoutBtn" type="button">Sair</button>
+</header>
+
+<main>
+  <div class="card">
+    <h1>Cadastro de usuário</h1>
+    <p><small>API base: <code id="apiBase"></code></small></p>
+
+    <form id="registerForm">
+      <div style="margin-bottom:8px;">
+        <label for="email">E-mail</label><br/>
+        <input id="email" name="email" type="email" required />
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <label for="password">Senha</label><br/>
+        <input id="password" name="password" type="password" required />
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <label for="role">Papel</label><br/>
+        <select id="role" name="role">
+          <option value="professor">Professor</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <button type="submit">Registrar</button>
+    </form>
+
+    <p id="registerMsg" style="margin-top:8px;color:#a7f3d0;display:none;"></p>
+    <p id="registerError" style="margin-top:8px;color:#f97373;display:none;"></p>
+  </div>
+</main>
+
+<script type="module">
+  import { API_BASE } from './src/config.js';
+
+  document.getElementById('apiBase').textContent = API_BASE;
+
+  const form = document.getElementById('registerForm');
+  const msgEl = document.getElementById('registerMsg');
+  const errEl = document.getElementById('registerError');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msgEl.style.display = 'none';
+    errEl.style.display = 'none';
+
+    const formData = new FormData(form);
+    const body = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        errEl.textContent = `Erro ao registrar (status ${res.status}): ${text}`;
+        errEl.style.display = 'block';
+        return;
+      }
+
+      msgEl.textContent = 'Usuário criado com sucesso! Agora faça login na tela de Login.';
+      msgEl.style.display = 'block';
+      form.reset();
+    } catch (err) {
+      console.error(err);
+      errEl.textContent = 'Erro de conexão com o servidor.';
+      errEl.style.display = 'block';
+    }
+  });
+</script>
+<script type="module" src="./src/header.js"></script>
+</body>
+</html>

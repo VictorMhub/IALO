@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Eventos — IALO</title>
+  <link rel="stylesheet" href="public/style.css"/>
+</head>
+<body>
+<header>
+  <a href="index.html">Início</a>
+  <a href="participants.html">Participantes</a>
+  <a href="attendance.html">Frequência</a>
+  <a class="active" href="events.html">Eventos</a>
+  <a href="reports.html">Relatórios</a>
+  <button id="logoutBtn" type="button">Sair</button>
+</header>
+<main>
+  <div class="card">
+    <h2>Novo Evento</h2>
+    <form id="form">
+      <input name="title" placeholder="Título" required />
+      <input type="date" name="date" required />
+      <input name="start_time" placeholder="Início (HH:MM)"/>
+      <input name="end_time" placeholder="Término (HH:MM)"/>
+      <input name="location" placeholder="Local"/>
+      <button>Salvar</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Lista</h2>
+    <table>
+      <thead><tr><th>Título</th><th>Data</th><th>Horário</th><th>Local</th><th>Ações</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</main>
+<script type="module">
+  import { API_BASE } from './src/config.js';
+  import { requireAuth } from './src/auth.js';
+
+  const token = requireAuth(); // exige login
+
+  async function listEvents() {
+    const res = await fetch(`${API_BASE}/events`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // opcional para GET, mas não atrapalha
+      }
+    });
+
+    if (!res.ok) {
+      alert('Erro ao carregar eventos');
+      return;
+    }
+
+    const data = await res.json();
+    const tbody = document.querySelector('tbody'); // ou #eventsBody, se você tiver um id
+    tbody.innerHTML = data.map(ev => `
+      <tr>
+        <td>${ev.title}</td>
+        <td>${ev.date}</td>
+        <td>${ev.start_time || ''}</td>
+        <td>${ev.end_time || ''}</td>
+        <td>${ev.location || ''}</td>
+        <td><button class="del" data-id="${ev.id}">Excluir</button></td>
+      </tr>
+    `).join('');
+  }
+
+  const form = document.querySelector('form'); // ou #eventForm
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const body = Object.fromEntries(formData.entries());
+
+      const res = await fetch(`${API_BASE}/events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // necessário para criar (Admin)
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        alert('Erro ao criar evento (precisa ser Admin).');
+        return;
+      }
+
+      form.reset();
+      listEvents();
+    });
+  }
+
+  document.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('del')) {
+      const id = e.target.dataset.id;
+      const res = await fetch(`${API_BASE}/events/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}` // necessário para deletar (Admin)
+        }
+      });
+
+      if (!res.ok) {
+        alert('Erro ao excluir evento (precisa ser Admin).');
+        return;
+      }
+
+      listEvents();
+    }
+  });
+
+  listEvents();
+</script>
+<script type="module" src="./src/header.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Relatórios — IALO</title>
+  <link rel="stylesheet" href="public/style.css"/>
+</head>
+<body>
+<header>
+  <a href="index.html">Início</a>
+  <a href="participants.html">Participantes</a>
+  <a href="attendance.html">Frequência</a>
+  <a href="events.html">Eventos</a>
+  <a class="active" href="reports.html">Relatórios</a>
+  <button id="logoutBtn" type="button">Sair</button>
+</header>
+<main>
+  <div class="card">
+    <h2>Frequência por Período</h2>
+    <div style="display:flex; gap:12px; flex-wrap:wrap">
+      <label>De: <input type="date" id="start"></label>
+      <label>Até: <input type="date" id="end"></label>
+      <button id="run">Gerar</button>
+    </div>
+    <table>
+      <thead><tr><th>Atividade</th><th>Data</th><th>Presentes</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</main>
+<script type="module">
+import { API_BASE } from './src/config.js';
+async function run(){
+  const s = document.getElementById('start').value;
+  const e = document.getElementById('end').value;
+  const r = await fetch(`${API_BASE}/reports/attendance?start=${s}&end=${e}`);
+  const data = await r.json();
+  const rows = document.getElementById('rows');
+  rows.innerHTML = data.map(item=>`<tr><td>${item.activity}</td><td>${item.date}</td><td>${item.presentCount}</td></tr>`).join('');
+}
+document.getElementById('run').onclick = run;
+</script>
+<script type="module" src="./src/header.js"></script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Frequência — IALO</title>
+  <link rel="stylesheet" href="public/style.css"/>
+</head>
+<body>
+<header>
+  <a href="index.html">Início</a>
+  <a href="participants.html">Participantes</a>
+  <a class="active" href="attendance.html">Frequência</a>
+  <a href="events.html">Eventos</a>
+  <a href="reports.html">Relatórios</a>
+  <button id="logoutBtn" type="button">Sair</button>
+</header>
+<main>
+  <div class="card">
+    <h2>Marcar Frequência</h2>
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+      <label>Atividade:
+        <select id="activity"></select>
+      </label>
+      <label>Data:
+        <input type="date" id="date"/>
+      </label>
+      <button id="load">Carregar</button>
+      <button id="save">Salvar</button>
+    </div>
+    <table>
+      <thead><tr><th>Participante</th><th>Presente?</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</main>
+<script type="module">
+  import { API_BASE } from './src/config.js';
+  import { requireAuth } from './src/auth.js';
+
+  const token = requireAuth(); // Professor ou Admin
+
+  async function loadActivities() {
+    const res = await fetch(`${API_BASE}/activities`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // opcional, mas pode usar
+      }
+    });
+
+    if (!res.ok) {
+      alert('Erro ao carregar atividades');
+      return;
+    }
+
+    const data = await res.json();
+    const select = document.getElementById('activity'); // ajuste se tiver outro id
+    select.innerHTML = data.map(a =>
+      `<option value="${a.id}">${a.title || a.name}</option>`
+    ).join('');
+  }
+
+  async function load() {
+    const activityId = document.getElementById('activity').value;
+    const date = document.getElementById('date').value;
+
+    if (!activityId || !date) {
+      alert('Selecione atividade e data');
+      return;
+    }
+
+
+    const res = await fetch(`${API_BASE}/participants`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      alert('Erro ao carregar participantes');
+      return;
+    }
+
+    const participants = await res.json();
+    const tbody = document.querySelector('tbody'); // ou #participantsBody
+    tbody.innerHTML = participants.map(p => `
+      <tr>
+        <td>${p.name}</td>
+        <td>
+          <input type="checkbox" data-id="${p.id}" />
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function save() {
+    const activityId = document.getElementById('activity').value;
+    const date = document.getElementById('date').value;
+
+    if (!activityId || !date) {
+      alert('Selecione atividade e data');
+      return;
+    }
+
+    const checkboxes = [...document.querySelectorAll('tbody input[type=checkbox]')];
+    const presences = checkboxes.map(cb => ({
+      participantId: cb.dataset.id,
+      status: cb.checked ? 'present' : 'absent'
+    }));
+
+    const res = await fetch(`${API_BASE}/attendance/mark`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // ESSENCIAL aqui
+      },
+      body: JSON.stringify({ activityId, date, presences })
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      alert(`Erro ao salvar frequência (status ${res.status}): ${text}`);
+      return;
+    }
+
+    alert('Frequência salva com sucesso!');
+  }
+
+  document.getElementById('load').onclick = load;
+  document.getElementById('save').onclick = save;
+
+  loadActivities();
+</script>
+<script type="module" src="./src/header.js"></script>
+</body>
+</html>

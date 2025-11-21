@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — IALO</title>
+  <link rel="stylesheet" href="public/style.css"/>
+</head>
+<body>
+<header>
+  <strong>IALO</strong>
+  <a href="index.html">Início</a>
+  <a href="participants.html">Participantes</a>
+  <a href="attendance.html">Frequência</a>
+  <a href="events.html">Eventos</a>
+  <a href="reports.html">Relatórios</a>
+  <a href="login.html" class="active">Login</a>
+  <a href="register.html">Registrar</a>
+  <button id="logoutBtn" type="button">Sair</button>
+</header>
+
+<main>
+  <div class="card">
+    <h1>Login</h1>
+    <p><small>API base: <code id="apiBase"></code></small></p>
+
+    <form id="loginForm">
+      <div style="margin-bottom:8px;">
+        <label for="email">E-mail</label><br/>
+        <input id="email" name="email" type="email" required />
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <label for="password">Senha</label><br/>
+        <input id="password" name="password" type="password" required />
+      </div>
+
+      <button type="submit">Entrar</button>
+    </form>
+
+    <p style="margin-top:12px;">
+      Não tem conta? <a href="register.html">Registrar novo usuário</a>
+    </p>
+
+    <p id="loginError" style="color:#f97373;margin-top:8px;display:none;"></p>
+  </div>
+</main>
+
+<script type="module">
+  import { API_BASE } from './src/config.js';
+  import { saveSession, getToken } from './src/auth.js';
+
+  // Mostrar API base
+  document.getElementById('apiBase').textContent = API_BASE;
+
+  const form = document.getElementById('loginForm');
+  const errorEl = document.getElementById('loginError');
+
+  // Se já estiver logado, manda direto pra home
+  if (getToken()) {
+    window.location.href = 'index.html';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.style.display = 'none';
+    errorEl.textContent = '';
+
+    const formData = new FormData(form);
+    const body = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        const msg = res.status === 401
+          ? 'E-mail ou senha inválidos.'
+          : `Erro ao fazer login (status ${res.status}).`;
+        errorEl.textContent = msg;
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      const data = await res.json(); // { token, role }
+      saveSession(data);
+      window.location.href = 'index.html';
+    } catch (err) {
+      console.error(err);
+      errorEl.textContent = 'Erro de conexão com o servidor.';
+      errorEl.style.display = 'block';
+    }
+  });
+</script>
+<script type="module" src="./src/header.js"></script>
+</body>
+</html>

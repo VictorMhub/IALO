@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Participantes — IALO</title>
+  <link rel="stylesheet" href="public/style.css"/>
+</head>
+<body>
+<header>
+  <a href="index.html">Início</a>
+  <a class="active" href="participants.html">Participantes</a>
+  <a href="attendance.html">Frequência</a>
+  <a href="events.html">Eventos</a>
+  <a href="reports.html">Relatórios</a>
+  <button id="logoutBtn" type="button">Sair</button>
+</header>
+<main>
+  <div class="card">
+    <h2>Novo participante</h2>
+    <form id="form">
+      <input placeholder="Nome" name="name" required />
+      <input type="date" name="birthdate" />
+      <input placeholder="Responsável" name="guardian" />
+      <input placeholder="Contato" name="contact" />
+      <button>Salvar</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Lista</h2>
+    <table>
+      <thead><tr><th>Nome</th><th>Nasc.</th><th>Contato</th><th>Ações</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</main>
+<script type="module">
+  import { API_BASE } from './src/config.js';
+  import { requireAuth } from './src/auth.js';
+
+  const token = requireAuth(); // se não tiver login, vai redirecionar
+
+  async function listParticipants() {
+    const res = await fetch(`${API_BASE}/participants`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+
+    // Ajuste aqui para bater com sua tabela
+    const tbody = document.querySelector('tbody');
+    tbody.innerHTML = data.map(p => `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.birthdate || ''}</td>
+        <td>${p.guardian || ''}</td>
+        <td>${p.contact || ''}</td>
+        <td><button class="del" data-id="${p.id}">Excluir</button></td>
+      </tr>
+    `).join('');
+  }
+
+  const form = document.querySelector('form');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const body = Object.fromEntries(formData.entries());
+
+      const res = await fetch(`${API_BASE}/participants`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        alert('Erro ao criar participante');
+        return;
+      }
+
+      form.reset();
+      listParticipants();
+    });
+  }
+
+  document.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('del')) {
+      const id = e.target.dataset.id;
+      const res = await fetch(`${API_BASE}/participants/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        alert('Erro ao excluir participante');
+        return;
+      }
+
+      listParticipants();
+    }
+  });
+
+  listParticipants();
+</script>
+<script type="module" src="./src/header.js"></script>
+</body>
+</html>
