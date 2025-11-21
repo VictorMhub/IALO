@@ -33,6 +33,8 @@ Foco desta entrega: **Backend (API REST)** + **Frontend Web estático**.
 ```text
 IALO_multiplataforma_repo/
 ├─ backend/
+│  └─ tests/
+│     ├─ api.test.js
 │  ├─ package.json
 │  └─ src/
 │     ├─ db.js
