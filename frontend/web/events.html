@@ -7,14 +7,19 @@
   <link rel="stylesheet" href="public/style.css"/>
 </head>
 <body>
-<header>
-  <a href="index.html">Início</a>
-  <a href="participants.html">Participantes</a>
-  <a href="attendance.html">Frequência</a>
-  <a class="active" href="events.html">Eventos</a>
-  <a href="reports.html">Relatórios</a>
-  <button id="logoutBtn" type="button">Sair</button>
-</header>
+  <header>
+    <strong>IALO</strong>
+    <a href="index.html" class="active">Início</a>
+    <a href="participants.html">Participantes</a>
+    <a href="activities.html">Atividades</a>
+    <a href="attendance.html">Frequência</a>
+    <a href="events.html">Eventos</a>
+    <a href="reports.html">Relatórios</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Registrar</a>
+    <button id="logoutBtn" type="button">Sair</button>
+  </header>
+  
 <main>
   <div class="card">
     <h2>Novo Evento</h2>
@@ -39,12 +44,12 @@
   import { API_BASE } from './src/config.js';
   import { requireAuth } from './src/auth.js';
 
-  const token = requireAuth(); // exige login
+  const token = requireAuth(); 
 
   async function listEvents() {
     const res = await fetch(`${API_BASE}/events`, {
       headers: {
-        'Authorization': `Bearer ${token}` // opcional para GET, mas não atrapalha
+        'Authorization': `Bearer ${token}` 
       }
     });
 
@@ -54,7 +59,7 @@
     }
 
     const data = await res.json();
-    const tbody = document.querySelector('tbody'); // ou #eventsBody, se você tiver um id
+    const tbody = document.querySelector('tbody'); 
     tbody.innerHTML = data.map(ev => `
       <tr>
         <td>${ev.title}</td>
@@ -67,7 +72,7 @@
     `).join('');
   }
 
-  const form = document.querySelector('form'); // ou #eventForm
+  const form = document.querySelector('form'); 
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -78,7 +83,7 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // necessário para criar (Admin)
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(body)
       });
@@ -99,7 +104,7 @@
       const res = await fetch(`${API_BASE}/events/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}` // necessário para deletar (Admin)
+          'Authorization': `Bearer ${token}` 
         }
       });
 

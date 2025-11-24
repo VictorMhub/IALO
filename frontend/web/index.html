@@ -9,18 +9,21 @@
 <body>
   <header>
     <strong>IALO</strong>
-    <a href="index.html">Início</a>
+    <a href="index.html" class="active">Início</a>
     <a href="participants.html">Participantes</a>
+    <a href="activities.html">Atividades</a>
     <a href="attendance.html">Frequência</a>
     <a href="events.html">Eventos</a>
     <a href="reports.html">Relatórios</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Registrar</a>
     <button id="logoutBtn" type="button">Sair</button>
   </header>
+  
   <main>
     <div class="card">
       <h1>Bem-vindo(a) — Instituto Além dos Olhos</h1>
       <p>Use o menu acima para gerenciar cadastros, frequência e eventos.</p>
-      <p><small>API base atual: <code id="apiBase"></code> — altere via <code>localStorage.setItem('API_BASE','http://...')</code></small></p>
     </div>
   </main>
   <script type="module">

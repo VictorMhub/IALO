@@ -1,4 +1,3 @@
-// frontend/web/src/auth.js
 
 export function getToken() {
   return localStorage.getItem('token');

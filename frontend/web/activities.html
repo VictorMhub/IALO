@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Atividades — IALO</title>
+  <link rel="stylesheet" href="public/style.css"/>
+</head>
+<body>
+<header>
+  <strong>IALO</strong>
+  <a href="index.html">Início</a>
+  <a href="participants.html">Participantes</a>
+  <a href="activities.html" class="active">Atividades</a>
+  <a href="attendance.html">Frequência</a>
+  <a href="events.html">Eventos</a>
+  <a href="reports.html">Relatórios</a>
+  <a href="login.html">Login</a>
+  <a href="register.html">Registrar</a>
+  <button id="logoutBtn" type="button">Sair</button>
+</header>
+
+<main>
+  
+  <div class="card" id="activityFormCard">
+    <h1>Nova atividade</h1>
+    <form id="activityForm">
+      <div style="margin-bottom:8px;">
+        <label for="name">Nome da atividade</label><br/>
+        <input id="name" name="name" required />
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <label for="description">Descrição (opcional)</label><br/>
+        <textarea id="description" name="description" rows="3"
+                  style="width:100%;padding:8px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#e5e7eb;"></textarea>
+      </div>
+
+      <button type="submit">Cadastrar atividade</button>
+      <p id="activityFormError" style="margin-top:8px;color:#f97373;display:none;"></p>
+    </form>
+  </div>
+
+  
+  <div class="card">
+    <h2>Atividades cadastradas</h2>
+    <p><small>Essas atividades aparecem no select da aba de Frequência e nos relatórios.</small></p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th style="width:120px;">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="activitiesBody">
+      
+      </tbody>
+    </table>
+
+    <p id="activitiesEmpty" style="margin-top:8px;display:none;">
+      Nenhuma atividade cadastrada ainda. Cadastre pelo formulário acima.
+    </p>
+  </div>
+</main>
+
+<script type="module" src="./src/header.js"></script>
+
+
+<script type="module">
+  import { API_BASE } from './src/config.js';
+  import { requireAuth, getRole } from './src/auth.js';
+
+  const token = requireAuth();      
+  const role  = getRole();         
+
+  const formCard   = document.getElementById('activityFormCard');
+  const form       = document.getElementById('activityForm');
+  const errorEl    = document.getElementById('activityFormError');
+  const tbody      = document.getElementById('activitiesBody');
+  const emptyMsgEl = document.getElementById('activitiesEmpty');
+
+  
+  if (role !== 'admin' && formCard) {
+    formCard.style.display = 'none';
+  }
+
+  async function listActivities() {
+    try {
+      const res = await fetch(`${API_BASE}/activities`, {
+        headers: {
+          
+          'Authorization': token ? `Bearer ${token}` : undefined
+        }
+      });
+
+      if (!res.ok) {
+        console.error('Erro ao listar atividades:', await res.text());
+        alert('Erro ao carregar atividades.');
+        return;
+      }
+
+      const data = await res.json();
+
+      if (!data.length) {
+        tbody.innerHTML = '';
+        emptyMsgEl.style.display = 'block';
+        return;
+      }
+
+      emptyMsgEl.style.display = 'none';
+
+      tbody.innerHTML = data.map(a => `
+        <tr>
+          <td>${a.name}</td>
+          <td>${a.description || ''}</td>
+          <td>
+            ${
+              role === 'admin'
+                ? `<button type="button" class="del-activity" data-id="${a.id}">Excluir</button>`
+                : `<small>Somente leitura</small>`
+            }
+          </td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      console.error(err);
+      alert('Erro de conexão ao carregar atividades.');
+    }
+  }
+
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.style.display = 'none';
+      errorEl.textContent = '';
+
+      if (role !== 'admin') {
+        errorEl.textContent = 'Somente administradores podem cadastrar atividades.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      const formData = new FormData(form);
+      const body = Object.fromEntries(formData.entries());
+
+      if (!body.name) {
+        errorEl.textContent = 'Nome da atividade é obrigatório.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/activities`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          errorEl.textContent = `Erro ao cadastrar (status ${res.status}): ${text}`;
+          errorEl.style.display = 'block';
+          return;
+        }
+
+        form.reset();
+        await listActivities();
+      } catch (err) {
+        console.error(err);
+        errorEl.textContent = 'Erro de conexão ao cadastrar atividade.';
+        errorEl.style.display = 'block';
+      }
+    });
+  }
+
+
+  document.addEventListener('click', async (e) => {
+    if (!e.target.classList.contains('del-activity')) return;
+
+    if (role !== 'admin') {
+      alert('Somente administradores podem excluir atividades.');
+      return;
+    }
+
+    const id = e.target.dataset.id;
+    if (!id) return;
+
+    const confirma = confirm('Tem certeza que deseja excluir esta atividade?');
+    if (!confirma) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/activities/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        alert(`Erro ao excluir atividade (status ${res.status}): ${text}`);
+        return;
+      }
+
+      await listActivities();
+    } catch (err) {
+      console.error(err);
+      alert('Erro de conexão ao excluir atividade.');
+    }
+  });
+
+
+  listActivities();
+</script>
+</body>
+</html>

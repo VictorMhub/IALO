@@ -7,14 +7,19 @@
   <link rel="stylesheet" href="public/style.css"/>
 </head>
 <body>
-<header>
-  <a href="index.html">Início</a>
-  <a href="participants.html">Participantes</a>
-  <a class="active" href="attendance.html">Frequência</a>
-  <a href="events.html">Eventos</a>
-  <a href="reports.html">Relatórios</a>
-  <button id="logoutBtn" type="button">Sair</button>
-</header>
+  <header>
+    <strong>IALO</strong>
+    <a href="index.html" class="active">Início</a>
+    <a href="participants.html">Participantes</a>
+    <a href="activities.html">Atividades</a>
+    <a href="attendance.html">Frequência</a>
+    <a href="events.html">Eventos</a>
+    <a href="reports.html">Relatórios</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Registrar</a>
+    <button id="logoutBtn" type="button">Sair</button>
+  </header>
+  
 <main>
   <div class="card">
     <h2>Marcar Frequência</h2>
@@ -38,12 +43,12 @@
   import { API_BASE } from './src/config.js';
   import { requireAuth } from './src/auth.js';
 
-  const token = requireAuth(); // Professor ou Admin
+  const token = requireAuth(); 
 
   async function loadActivities() {
     const res = await fetch(`${API_BASE}/activities`, {
       headers: {
-        'Authorization': `Bearer ${token}` // opcional, mas pode usar
+        'Authorization': `Bearer ${token}` 
       }
     });
 
@@ -53,7 +58,7 @@
     }
 
     const data = await res.json();
-    const select = document.getElementById('activity'); // ajuste se tiver outro id
+    const select = document.getElementById('activity'); 
     select.innerHTML = data.map(a =>
       `<option value="${a.id}">${a.title || a.name}</option>`
     ).join('');
@@ -81,7 +86,7 @@
     }
 
     const participants = await res.json();
-    const tbody = document.querySelector('tbody'); // ou #participantsBody
+    const tbody = document.querySelector('tbody');
     tbody.innerHTML = participants.map(p => `
       <tr>
         <td>${p.name}</td>
@@ -111,7 +116,7 @@
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // ESSENCIAL aqui
+        'Authorization': `Bearer ${token}` 
       },
       body: JSON.stringify({ activityId, date, presences })
     });

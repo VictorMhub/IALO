@@ -7,22 +7,23 @@
   <link rel="stylesheet" href="public/style.css"/>
 </head>
 <body>
-<header>
-  <strong>IALO</strong>
-  <a href="index.html">Início</a>
-  <a href="participants.html">Participantes</a>
-  <a href="attendance.html">Frequência</a>
-  <a href="events.html">Eventos</a>
-  <a href="reports.html">Relatórios</a>
-  <a href="login.html">Login</a>
-  <a href="register.html" class="active">Registrar</a>
-  <button id="logoutBtn" type="button">Sair</button>
-</header>
+  <header>
+    <strong>IALO</strong>
+    <a href="index.html" class="active">Início</a>
+    <a href="participants.html">Participantes</a>
+    <a href="activities.html">Atividades</a>
+    <a href="attendance.html">Frequência</a>
+    <a href="events.html">Eventos</a>
+    <a href="reports.html">Relatórios</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Registrar</a>
+    <button id="logoutBtn" type="button">Sair</button>
+  </header>
+  
 
 <main>
   <div class="card">
     <h1>Cadastro de usuário</h1>
-    <p><small>API base: <code id="apiBase"></code></small></p>
 
     <form id="registerForm">
       <div style="margin-bottom:8px;">
@@ -54,7 +55,6 @@
 <script type="module">
   import { API_BASE } from './src/config.js';
 
-  document.getElementById('apiBase').textContent = API_BASE;
 
   const form = document.getElementById('registerForm');
   const msgEl = document.getElementById('registerMsg');
