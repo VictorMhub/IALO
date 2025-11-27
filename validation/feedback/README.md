@@ -1,1 +1,0 @@
-Coloque aqui arquivos `.md` com feedbacks brutos e formulários digitalizados.

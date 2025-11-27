@@ -1,24 +1,12 @@
 # Relatório de Validação com Público-Alvo
 
 ## 1. Apresentação realizada
-- Data/Local:
-- Participantes presentes:
-- Objetivo da reunião/apresentação:
+- Data/Local: 26/11/2025
+- Participantes presentes: Toda a esquipe e Maria Cecilia.
+- Objetivo da reunião/apresentação: Mostrar nosso software para a Maria Cecilia (gestora da ONG)
 
 ## 2. Evidências
-- Fotos/Vídeos (coloque em `validation/evidence/`)
-- Anexar autorização (se necessário)
+- Fotos/Vídeos em `validation/evidence/`
 
 ## 3. Feedback coletado
-- Pontos positivos (o que funcionou bem)
-- Pontos de melhoria (sugestões)
-- Itens críticos
-
-## 4. Ajustes implementados após feedback
-- [ ] Ajuste A — descrição
-- [ ] Ajuste B — descrição
-- [ ] Ajuste C — descrição
-
-## 5. Resultados e aprendizados
-- Impacto observado
-- Próximos passos
+- Feedback em `/feedback`
