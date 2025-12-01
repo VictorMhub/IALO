@@ -9,6 +9,7 @@ Aplicação **multiplataforma (Web + Backend)** para apoiar o Instituto Além do
 - Relatórios simples de presença
 
 Foco desta entrega: **Backend (API REST)** + **Frontend Web estático**.
+Link para o site em produção: https://ialo-2xeq.vercel.app
 
 ---
 
